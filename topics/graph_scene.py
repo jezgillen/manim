@@ -196,20 +196,20 @@ class GraphScene(Scene):
         return label
 
     def get_riemann_rectangles(
-        self, 
-        graph,
-        x_min = None, 
-        x_max = None, 
-        dx = 0.1, 
-        input_sample_type = "left",
-        stroke_width = 1,
-        stroke_color = BLACK,
-        fill_opacity = 1,
-        start_color = None,
-        end_color = None,
-        show_signed_area = True,
-        width_scale_factor = 1.001
-        ):
+            self, 
+            graph,
+            x_min = None, 
+            x_max = None, 
+            dx = 0.1, 
+            input_sample_type = "left",
+            stroke_width = 1,
+            stroke_color = BLACK,
+            fill_opacity = 1,
+            start_color = None,
+            end_color = None,
+            show_signed_area = True,
+            width_scale_factor = 1.001
+            ):
         x_min = x_min if x_min is not None else self.x_min
         x_max = x_max if x_max is not None else self.x_max
         if start_color is None:
@@ -236,6 +236,49 @@ class GraphScene(Scene):
             rect = Rectangle()
             rect.replace(points, stretch = True)
             if graph_point[1] < self.graph_origin[1] and show_signed_area:
+                fill_color = invert_color(color)
+            else:
+                fill_color = color
+            rect.set_fill(fill_color, opacity = fill_opacity)
+            rect.set_stroke(stroke_color, width = stroke_width)
+            rectangles.add(rect)
+        return rectangles
+
+    def bar_graph_bars(
+            self, 
+            array,
+            x_min = None, 
+            x_max = None, 
+            dx = 0.1, 
+            input_sample_type = "left",
+            stroke_width = 1,
+            stroke_color = BLACK,
+            fill_opacity = 1,
+            start_color = None,
+            end_color = None,
+            show_signed_area = True,
+            width_scale_factor = 1.001
+            ):
+        x_min = x_min if x_min is not None else self.x_min
+        x_max = x_max if x_max is not None else self.x_max
+        if start_color is None:
+            start_color = BLUE
+        if end_color is None:
+            end_color = RED
+        rectangles = VGroup()
+        x_range = np.arange(x_min, x_max, (x_max-x_min)/len(array)) 
+        colors = color_gradient([start_color, end_color], len(x_range))
+        for bar_size, x, color in zip(array, x_range, colors):
+            x += 1
+            points = VGroup(*map(VectorizedPoint, [
+                self.coords_to_point(x-0.5*width_scale_factor, 0),
+                self.coords_to_point(x+width_scale_factor*0.5, 0),
+                self.coords_to_point(x, bar_size)
+            ]))
+
+            rect = Rectangle()
+            rect.replace(points, stretch = True)
+            if self.coords_to_point(x, bar_size)[1] < self.graph_origin[1] and show_signed_area:
                 fill_color = invert_color(color)
             else:
                 fill_color = color

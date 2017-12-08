@@ -312,7 +312,8 @@ def tex_to_svg_file(expression, template_tex_file):
         return get_sorted_image_list(image_dir)
     tex_file = generate_tex_file(expression, template_tex_file)
     dvi_file = tex_to_dvi(tex_file)
-    return dvi_to_svg(dvi_file)
+    ret = dvi_to_svg(dvi_file)
+    return ret
 
 def generate_tex_file(expression, template_tex_file):
     result = os.path.join(
@@ -341,11 +342,10 @@ def tex_to_dvi(tex_file):
         commands = [
             "latex", 
             "-interaction=batchmode", 
-            "-halt-on-error",
+            #"-halt-on-error",
             "-output-directory=" + TEX_DIR,
             tex_file,
-            ">",
-            get_null()
+            ">/dev/null",
         ]
         exit_code = os.system(" ".join(commands))
         if exit_code != 0:
@@ -354,30 +354,27 @@ def tex_to_dvi(tex_file):
             if os.path.exists(log_file):
                 with open(log_file, 'r') as f:
                     latex_output = f.read()
-            raise Exception(
+            print(
                 "Latex error converting to dvi. "
                 "See log output above or the log file: %s" % log_file)
     return result
 
-def dvi_to_svg(dvi_file, regen_if_exists = False):
+def dvi_to_svg(dvi_file, regen_if_exists = True):
     """
     Converts a dvi, which potentially has multiple slides, into a 
     directory full of enumerated pngs corresponding with these slides.
     Returns a list of PIL Image objects for these images sorted as they
     where in the dvi
     """
-    result = dvi_file.replace(".dvi", ".svg")
+    result = dvi_file.replace(".dvi",".svg")
     if not os.path.exists(result):
         commands = [
             "dvisvgm",
             dvi_file,
             "-n",
-            "-v",
-            "0",
             "-o",
             result,
-            ">",
-            get_null()
+            ">/dev/null",
         ]
         os.system(" ".join(commands))
     return result

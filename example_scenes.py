@@ -47,6 +47,6 @@ class WarpSquare(Scene):
 
 class WriteStuff(Scene):
     def construct(self):
-        self.play(Write(TextMobject("Stuff").scale(3)))
+        self.play(Write(TextMobject(r'$\frac{1}{2\pi} \sum a^2 + r^2 = potato^2$').scale(2)))
 
 

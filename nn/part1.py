@@ -969,28 +969,14 @@ class BreakDownName(Scene):
         VGroup(q2, a2).highlight(YELLOW)
 
         randy = Randolph().to_corner(DOWN+LEFT)
-        brain = SVGMobject(file_name = "brain")
-        brain.set_fill(LIGHT_GREY, opacity = 0)
-        brain.replace(randy.eyes, dim_to_match = 1)
-
-        self.add(name)
-        self.play(randy.change, "pondering")
-        self.play(
-            brain.scale_to_fit_height, 2,
-            brain.shift, 2*UP,
-            brain.set_fill, None, 1,
-            randy.look, UP
-        )
-        brain_outline = brain.copy()
-        brain_outline.set_fill(opacity = 0)
-        brain_outline.set_stroke(BLUE_B, 3)
         self.play(
             ShowPassingFlash(
-                brain_outline, 
+                randy, 
                 time_width = 0.5,
                 run_time = 2
             )
         )
+
         self.play(Blink(randy))
         self.dither()
         self.play(
@@ -1006,7 +992,7 @@ class BreakDownName(Scene):
         self.dither(2)
 
         self.play(*map(FadeOut, [
-            name, randy, brain, 
+            name, randy,
             q2, a1, a2,
             q1[0], q1[2]
         ]))

@@ -16,6 +16,8 @@ CLOSED_THRESHOLD = 0.01
 STRAIGHT_PATH_THRESHOLD = 0.01
 
 def play_chord(*nums):
+    fade = 0.5
+    length = 1.0
     commands = [
         "play",
         "-n",
@@ -26,13 +28,16 @@ def play_chord(*nums):
         "sin %-"+str(num)
         for num in nums
     ] + [
-        "fade h 0.5 1 0.5", 
+        "fade h",
+        str(fade),
+        str(length),
+        str(fade),
         "> /dev/null"
     ]
     try:
         os.system(" ".join(commands))
     except:
-        pass
+        print("Install sox for sounds")
 
 def play_error_sound():
     play_chord(11, 8, 6, 1)

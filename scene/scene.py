@@ -33,7 +33,6 @@ class Scene(object):
         "output_directory" : MOVIE_DIR,
         "name" : None,
         "always_continually_update" : False,
-        "random_seed" : 0,
     }
     def __init__(self, **kwargs):
         digest_config(self, kwargs)
@@ -46,9 +45,6 @@ class Scene(object):
         self.shared_locals = {}
         if self.name is None:
             self.name = self.__class__.__name__
-        if self.random_seed is not None:
-            random.seed(self.random_seed)
-            np.random.seed(self.random_seed)
 
         self.setup()
         if self.write_to_movie:
@@ -330,7 +326,7 @@ class Scene(object):
 
     def compile_play_args_to_animation_list(self, *args):
         """
-        Eacn arg can either be an animation, or a mobject method
+        Each arg can either be an animation, or a mobject method
         followed by that methods arguments.  
 
         This animation list is built by going through the args list, 
@@ -420,6 +416,9 @@ class Scene(object):
         return []
 
     def dither(self, duration = DEFAULT_DITHER_TIME):
+        """
+        This function is just a delay in the animation
+        """
         if self.skip_animations:
             return self
 
