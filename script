@@ -1,0 +1,34 @@
+
+So you want to have an algorithm that can learn complex tasks (like playing games), by rewarding it when it does well and punishing it when it does badly.
+One algorithm for doing this is called DQN, and at the core of this algorithm is the Q function.
+The Q function takes as input an observation, and a potential action, and outputs what it predicts the reward to be if it took that action in that context. The interesting thing about the q function is that it doesn't just predict the reward it will be given in the next timestep, it predicts the reward it will receive over the entire rest of the game. How it learns to do this is really interesting.
+
+So how do we get a Q function? We use a universal function approximator
+
+
+
+
+
+Why this video?
+I did a neural networks course last year, and most of the concepts were taught to us with by 3 hour power points filled with equations. [obvious visual, information dense]. This isn't a *terrible* way of teaching, and I think I did learn a lot, but there were several algorithms that lent themselves to a more visual explanation and intuition. This is my attempt to explain deep Q learning in a more intuitive way, inspired by the explanations of Grant at 3Blue1Brown, and also using his software. [Thanks] 
+
+Why do you want to know about Q learning?
+A few reasons: I think it's the next level up from using neural networks for basic recognition tasks. It's a way more interesting way to use neural networks. It's a good intro to reinforcement learning in general. And if you understand this, you should have most of the tools necessary to understand 
+
+Q learning is one way to create an 'agent', which is software that makes decisions. It can be used to play games like go and chess, various simpler games like balancing, or complex tasks like walking or picking up an object. Something vauguely like this is probably what they use for self-driving cars. {Maybe just say more complex tasks than classification}.
+
+A Q Learning algorithm makes decisions by observing the state of the its environment, then predicting how much reward it will recieve for each of it's possible actions. It then chooses the action it predicts is best. 
+In this example {describe based on animation of fully trained cartpole}
+{decribe how reward is given at each step}
+
+The heart of Q Learning is the way it learns to do this prediction. 
+Q function
+The agent is given some reward for every action it takes. {example} This leads it to 
+One way you might do this is to just train the neural network by giving it observations as input and the amount of reward that ended up being given at the end of the [trial]. I tried this, and it didn't seem to be learning anything. The agent would have trouble being able to tell which actions lead to more reward and which were mistakes. The way this problem is solved is by having the network trained on it's *own* future predictions. This is a weird thing to do, {hopefully some animation helps}
+
+EXPERIENCE REPLAY
+The knowledge trickles down from the future to the past
+
+
+GAMMA
+network doesn't have to calculate as far into the future, only gives a fuck about the near future. Good for reducing computation and model complexity
