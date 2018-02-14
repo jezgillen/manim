@@ -965,7 +965,22 @@ class MoveForwardWithApproximation(TeacherStudentsScene):
         self.teacher_says(words, target_mode = "shruggie")
         self.dither(3)
 
-class QFunctionIntro(Scene):
+from nn.part1 import NetworkScene
+class QFunctionIntro(NetworkScene):
+    CONFIG = {
+        "layer_sizes" : [4,50,50,2],
+        "network_mob_config" : {
+            "neuron_stroke_color" : ORANGE,
+            "neuron_stroke_width" : 2,
+            "neuron_fill_color" : RED,
+            "average_shown_activation_of_large_layer" : True,
+            "edge_propogation_color" : YELLOW,
+            "edge_propogation_time" : 2,
+        }
+    }
+    def setup(self):
+        NetworkScene.setup(self)
+        self.remove(self.network_mob)
     def construct(self):
         Q = TexMobject(
             "Q(","$ observation $",",","$ possible actions $",") = ", "$ predicted reward$"
@@ -975,9 +990,129 @@ class QFunctionIntro(Scene):
         self.dither()
         self.play(Transform(Q,Q_short))
         self.dither()
+        self.network_mob.scale(0.4)
+        self.play(Q.fade,1.0,Transform(Q_short,self.network_mob))
+        self.dither(2)
 
-class BoardGame(Scene):
-    pass
+class SnakeScene(Scene):
+    CONFIG = {
+        "block_size" : 0.37,
+        "head_colour" : BLUE,
+        "tail_colour" : DARK_BLUE,
+        "start_pos" : 2*(UP),
+        "init_length" : 5,
+        }
+    def setup(self):
+        self.add_snake()
+    def add_snake(self):
+        rect = Square(
+                side_length = self.block_size,
+                stroke_width = 0,
+                fill_color = self.head_colour,
+                fill_opacity = 1,
+                )
+        rect.shift(self.start_pos+LEFT*0.5*self.init_length)
+        self.snake = VGroup(*[rect.copy().shift(i*0.5*RIGHT) for i in range(self.init_length)])
+        self.snake.submobject_gradient_highlight(self.tail_colour,self.head_colour)
+        self.previous_direction = RIGHT
+        eye_location = self.snake[-1].get_center()+0.05*(RIGHT) + 0.07*DOWN
+        eye_location2 = self.snake[-1].get_center()+0.05*(RIGHT) + 0.07*UP
+        eye1 = Dot(point = eye_location, color = BLACK, radius = 0.05)
+        eye2 = Dot(point = eye_location2, color = BLACK, radius = 0.05)
+        self.eye = VGroup(eye1,eye2)
+        self.snake[-1].add(self.eye)
+        self.add(self.snake)
+    def move_snake(self,direction):
+        if((self.previous_direction == -direction).all()):
+            raise RuntimeError("Snake cannot go backwards")
+        if(np.allclose(self.snake[-1].get_center(),self.food.get_center())):
+            self.remove(self.food)
+            self.add_block_to_tail(direction)
+        moves = []
+        for i,rect in enumerate(self.snake[:-1]):
+            moves += [rect.move_to,self.snake[i+1]]
+        moves += [self.snake[-1].shift,0.5*direction]
+        angle_of_rotation = angle_of_vector(self.previous_direction)-angle_of_vector(direction)
+        moves += [self.snake[-1].rotate_in_place,-angle_of_rotation]
+        # self.play(self.snake[-1].rotate_in_place,-angle_of_rotation)
+        self.play(*moves)
+        self.previous_direction = direction
+        return moves
+    def add_block_to_tail(self,direction):
+        tail_block = self.snake[0].copy()
+        self.add(tail_block)
+        self.snake.add_to_back(tail_block)
+        self.snake[-1].remove(self.eye)
+        self.snake.submobject_gradient_highlight(self.tail_colour,self.head_colour)
+        self.snake[-1].add(self.eye)
+    def flash_red(self):
+        self.snake[-1].remove(self.eye)
+        self.snake.highlight(MAROON)
+        self.dither(0.33)
+        self.snake.submobject_gradient_highlight(self.tail_colour,self.head_colour)
+        self.dither(0.33)
+        self.snake.highlight(MAROON)
+        self.dither(0.33)
+        self.snake.submobject_gradient_highlight(self.tail_colour,self.head_colour)
+        self.snake[-1].add(self.eye)
+    def add_food(self,x_coord,y_coord):
+        location = self.snake[-1].get_center() + x_coord*UP*0.5 + y_coord*RIGHT*0.5
+        food = Square(
+                side_length = self.block_size/2,
+                stroke_width = 0,
+                fill_color = GOLD,
+                fill_opacity = 1,
+                )
+        food.shift(location)
+        self.add(food)
+        self.food = food
+    def say(self, string, time=1):
+        bubble = ThoughtBubble(height=2, width=4, stroke_width = 1,direction=RIGHT)
+        bubble.pin_to(self.snake[-1])
+        bubble.write(string)
+        bubble.resize_to_content()
+        self.add(bubble)
+        self.play(Write(bubble.content))
+        self.dither(time)
+        self.remove(bubble)
+        self.remove(bubble.content)
+    def smile(self, time=1):
+        self.say("$\ddot\smile$")
+    def frown(self, time=1):
+        self.say("$\ddot\\frown$")
+        
+
+
+
+
+class Intro(SnakeScene):
+    def construct(self):
+        full_title = TextMobject(
+            "Deep", "Q","Networks"
+            ).scale(3)
+        initials= TextMobject("D","Q","N").scale(4)
+        self.play(Write(initials))
+        self.dither()
+        self.play(Transform(initials,full_title))
+        self.dither()
+        self.play(full_title.fade,1.0)
+        # self.play(Write(TextMobject('DQN')
+        for i in range(2):
+            self.add_food(-2,-4)
+            self.move_snake(RIGHT)
+            self.move_snake(DOWN)
+            self.move_snake(DOWN)
+            self.move_snake(LEFT)
+            self.move_snake(LEFT)
+            self.move_snake(LEFT)
+            self.move_snake(LEFT)
+            self.smile()
+            self.move_snake(LEFT)
+            self.move_snake(LEFT)
+            self.move_snake(LEFT)
+            self.move_snake(DOWN)
+            self.move_snake(RIGHT)
+
 
 class GraphReward(GraphScene):
     CONFIG = {
