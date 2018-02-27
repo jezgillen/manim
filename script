@@ -1,11 +1,17 @@
 
-So you want to have an algorithm that can learn complex tasks (like playing games), by rewarding it when it does well and punishing it when it does badly.
-One algorithm for doing this is called DQN, and at the core of this algorithm is the Q function.
-The Q function takes as input an observation, and a potential action, and outputs what it predicts the reward to be if it took that action in that context. The interesting thing about the q function is that it doesn't just predict the reward it will be given in the next timestep, it predicts the reward it will receive over the entire rest of the game. How it learns to do this is really interesting.
+So we want to have an algorithm that can learn complex tasks (like playing games), by rewarding it when it does well and punishing it when it does badly.
+One algorithm for doing this is called DQN, (a little about when it was invented and atari)
+At the core of this algorithm is the Q function. [show on screen] 
+The Q function takes as input an observation [expand function], and a potential action, and outputs what it predicts the reward to be if it took that action in that context. The interesting thing about the q function is that it doesn't just predict the reward it will be given in the next timestep, it predicts the sum of the reward that will be given for the rest of the game.
 
-So how do we get a Q function? We use a universal function approximator
+For example, let's look at what the Q function would do in the snake game. We'll assume that the the agent gets one point each time it eats some food, and that this score is used as the reward. At each timestep, the agent evaluates the Q function for each action it could take. I'll explain why the predicted rewards aren't necessarily integers in a minute.
+It then chooses the action with the highest score and executes it. 
+So that part of the algorithm is pretty simple. It's just predict each score, choose the best, do it. The tricky part is how to train the Q function so that it outputs the correct predictions.
 
+In deep Q learning, the Q function is approximated with a neural network. A neural network can be thought of as a universal function approximator, that is trained to approximate any function just by giving it input examples which are paired with a target. For details on how this works, see 3b1b. 
+So how are we going to get target predictions? Or to put it another way, how can the algorithm figure out, in retrospect, what it should have predicted the reward to be at each point in the game.
 
+This graph represents the target rewards over an enitre game
 
 
 

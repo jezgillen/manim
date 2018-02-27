@@ -1004,6 +1004,7 @@ class SnakeScene(Scene):
         }
     def setup(self):
         self.add_snake()
+        self.food = None
     def add_snake(self):
         rect = Square(
                 side_length = self.block_size,
@@ -1022,10 +1023,10 @@ class SnakeScene(Scene):
         self.eye = VGroup(eye1,eye2)
         self.snake[-1].add(self.eye)
         self.add(self.snake)
-    def move_snake(self,direction):
+    def move_snake(self,direction,play=True):
         if((self.previous_direction == -direction).all()):
             raise RuntimeError("Snake cannot go backwards")
-        if(np.allclose(self.snake[-1].get_center(),self.food.get_center())):
+        if(self.food and np.allclose(self.snake[-1].get_center(),self.food.get_center())):
             self.remove(self.food)
             self.add_block_to_tail(direction)
         moves = []
@@ -1035,9 +1036,11 @@ class SnakeScene(Scene):
         angle_of_rotation = angle_of_vector(self.previous_direction)-angle_of_vector(direction)
         moves += [self.snake[-1].rotate_in_place,-angle_of_rotation]
         # self.play(self.snake[-1].rotate_in_place,-angle_of_rotation)
-        self.play(*moves)
+        if play:
+            self.play(*moves)
         self.previous_direction = direction
-        return moves
+        if not play:
+            return moves
     def add_block_to_tail(self,direction):
         tail_block = self.snake[0].copy()
         self.add(tail_block)
@@ -1056,7 +1059,7 @@ class SnakeScene(Scene):
         self.snake.submobject_gradient_highlight(self.tail_colour,self.head_colour)
         self.snake[-1].add(self.eye)
     def add_food(self,x_coord,y_coord):
-        location = self.snake[-1].get_center() + x_coord*UP*0.5 + y_coord*RIGHT*0.5
+        location = self.snake[-1].get_center() + y_coord*UP*0.5 + x_coord*RIGHT*0.5
         food = Square(
                 side_length = self.block_size/2,
                 stroke_width = 0,
@@ -1086,32 +1089,50 @@ class SnakeScene(Scene):
 
 
 class Intro(SnakeScene):
+    CONFIG = {
+        "head_colour" : BLUE,
+        "tail_colour" : DARK_BLUE,
+        "start_pos" : 1.5*(DOWN)+3*LEFT,
+        "init_length" : 5,
+        }
     def construct(self):
         full_title = TextMobject(
             "Deep", "Q","Networks"
             ).scale(3)
         initials= TextMobject("D","Q","N").scale(4)
-        self.play(Write(initials))
+        moves = self.move_snake(RIGHT,play=False)
+        moves += [Write(initials)]
+        self.play(*moves)
+        self.add_food(3,-1)
+        self.move_snake(DOWN)
+        self.move_snake(RIGHT)
+        self.move_snake(RIGHT)
+        self.move_snake(RIGHT)
+        self.move_snake(RIGHT)
+        self.add_food(-4,-1)
+        self.move_snake(RIGHT)
+        self.move_snake(DOWN)
+        self.move_snake(LEFT)
+        self.move_snake(LEFT)
+        self.move_snake(LEFT)
+        moves = self.move_snake(LEFT,play=False)
+        moves += [Transform(initials,full_title)]
+        self.play(*moves)
+        self.move_snake(LEFT)
+        self.move_snake(DOWN)
+        self.add_food(9,-1)
+        self.move_snake(RIGHT)
+        self.move_snake(RIGHT)
+        self.move_snake(RIGHT)
+        self.move_snake(RIGHT)
+        self.move_snake(RIGHT)
+        self.move_snake(RIGHT)
+        self.move_snake(RIGHT)
+        self.move_snake(DOWN)
+        self.move_snake(DOWN)
+        self.flash_red()
         self.dither()
-        self.play(Transform(initials,full_title))
-        self.dither()
-        self.play(full_title.fade,1.0)
-        # self.play(Write(TextMobject('DQN')
-        for i in range(2):
-            self.add_food(-2,-4)
-            self.move_snake(RIGHT)
-            self.move_snake(DOWN)
-            self.move_snake(DOWN)
-            self.move_snake(LEFT)
-            self.move_snake(LEFT)
-            self.move_snake(LEFT)
-            self.move_snake(LEFT)
-            self.smile()
-            self.move_snake(LEFT)
-            self.move_snake(LEFT)
-            self.move_snake(LEFT)
-            self.move_snake(DOWN)
-            self.move_snake(RIGHT)
+        # self.play(full_title.fade,1.0)
 
 
 class GraphReward(GraphScene):
